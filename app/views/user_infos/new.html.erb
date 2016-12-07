@@ -1,0 +1,25 @@
+<div class='page-content'>
+  <ul class="page-breadcrumb breadcrumb">
+    <li>
+      <%= link_to 'Home', cpanel_root_path %>
+      <i class="fa fa-circle"></i>
+    </li>
+    <li>
+      <%= link_to '内部用户管理', cpanel_admins_path %>
+      <i class="fa fa-circle"></i>
+    </li>
+    <li>
+      <%= link_to '添加内部用户', '#' %>
+    </li>
+  </ul>
+  <div class="panel panel-default">
+    <div class='panel-heading'>
+      <h4 class="panel-title">
+        添加内部用户
+      </h4>
+    </div>
+    <div class="panel-body">
+      <%= render partial: 'form', locals: {url: cpanel_admins_path } %>
+    </div>
+  </div>
+</div>

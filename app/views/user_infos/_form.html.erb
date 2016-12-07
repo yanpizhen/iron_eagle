@@ -1,0 +1,89 @@
+<script type="text/javascript" src="//dn-zhubaijiao.qbox.me/libs/plupload/2.1.8/plupload.full.min.js"></script>
+<%= form_for @form, url:url, html: { class: 'form-horizontal' } do |f| %>
+    <%= render 'shared/cpanel/error_messages', object: @form %>
+    <div class="form-group">
+      <div class="col-md-6">
+        <%= f.label :name, '姓名*' %>
+        <%= f.text_field :name, class: 'form-control', placeholder: '输入真实姓名', required: true %>
+      </div>
+      <div class="col-md-6">
+        <%= f.label :email, '邮箱*' %>
+        <%= f.text_field :email, class: 'form-control', placeholder: '输入邮箱,可用于登录', required: true %>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-md-6">
+        <%= f.label :department_id, '部门*' %>
+        <%= f.select :department_id, Department.all.map{|r| [r.name, r.id]}, {include_blank: '选择部门'}, class: 'form-control', required: true %>
+      </div>
+      <div class="col-md-6">
+        <%= f.label :phone, '电话' %>
+        <%= f.text_field :phone, class: 'form-control', placeholder: '输入联系方式' %>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-md-12">
+        <label for="">设置权限*</label>
+        <br>
+        <% Role.new_role.each do |r| %>
+            <% checked = @form.model.has_role? r.name.to_sym %>
+            <%= check_box_tag("role[]", r.name, checked, {id: "role_#{r.id}"}) %>
+            <label for=""><span class='label label-sm label-info'><%= r.description %></span></label>
+        <% end %>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-md-12">
+        <%= f.label :avatar, '头像' %>
+        <div class="avatar-uploader" id="container">
+          <div class="image">
+            <%= f.hidden_field :q_key %>
+            <%= f.hidden_field :q_bucket %>
+            <%= link_to '#', class: "thumbnail", id: 'pickfiles' do %>
+                <%= image_tag(@form.model.avatar_url(:avatarn), size: "96") %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-md-12">
+        <%= f.label :description, '简介' %>
+        <%= f.text_area :description, class: 'form-control', rows:2 %>
+      </div>
+    </div>
+    <% if policy(@form).create? %>
+        <%= f.submit '提交', class: 'btn btn-primary', data: { disable_with: '请稍等...'} %>
+    <% end %>
+    <div class="col-md-12">
+      <table class="table table-striped table-hover text-left" style="margin-top:40px; display: none;">
+        <thead>
+        <tr>
+          <th class="col-md-4">Filename</th>
+          <th class="col-md-2">Size</th>
+          <th class="col-md-6">Detail</th>
+        </tr>
+        </thead>
+        <tbody id="fsUploadProgress"></tbody>
+      </table>
+    </div>
+<% end %>
+<script type="text/javascript">
+    <% if @form.q_key.present? %>
+    var url = "<%= ::ZBJ::QINIU_BUCKET_DOMAIN %>/<%= @form.q_key %>"
+    $('#pickfiles').find('img').attr('src', url);
+    <% end %>
+    new CPANEL.uploader({
+        'param': {'namespace': 'a'},
+        'success': function(up, file, info) {
+            res = $.parseJSON(info);
+            $('#admin_q_key').val(res.key);
+            $('#admin_q_bucket').val(res.bucket);
+            domain = up.getOption('domain');
+            url = domain + encodeURI(res.key);
+            $('#pickfiles').find('img').attr('src', url);
+        },
+        'error': function(up, err, errTip) {
+        }
+    })
+</script>

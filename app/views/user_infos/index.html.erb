@@ -1,0 +1,162 @@
+<div class='page-content'>
+  <div class='panel panel-default grid'>
+    <div class='panel-body'>
+      <div class="table-toolbar">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="well well-sm shadow">
+              <%= render partial: 'search' %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <div class='mg-bt btn btn-info'>
+            排序： <%= sort_link(@search, :id, '创建时间', default_order: :asc) %> | <%= sort_link(@search, :age, '年龄', default_order: :asc) %>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-1">
+          <%= link_to '添加人员', new_user_infos_path, class: 'mg-bt btn green' %>
+        </div>
+
+        <div class="col-md-1">
+          <% if @current_admin.has_resources?('offers_set_offer_owner_information') %>
+              <%= button_tag '批量关联房东', id: 'batch_bind_offer_owner_ids_btn', class: 'j-batch-offer-owner-information-select-edit mg-bt btn green' %>
+          <% end %>
+        </div>
+
+        <div class="col-md-1">
+          <% if @current_admin.has_resources?('offers_edit') %>
+              <%= form_tag set_high_point_offer_cpanel_offers_path, method: :put, remote: true, id: 'set_highpoint_offer_form' do %>
+                  <%= button_tag '批量设置高端', id: 'set_highpoint_offer_btn', class: 'mg-bt btn green' %>
+              <% end %>
+          <% end %>
+        </div>
+      </div>
+
+      <p>房源数量: <%= @offers_count %></p>
+
+      <div class="table-scrollable">
+        <table class="table table-hover">
+          <tr>
+            <% if @current_admin.has_resources?('offers_set_offer_owner_information') %>
+                <th>
+                  <div>
+                    <input type="checkbox" id="choiceAll">
+                    <label for="selectAll"></label>
+                  </div>
+                </th>
+            <% end %>
+            <th>来源</th>
+            <th>来源ID</th>
+            <th>房源ID</th>
+            <th>房屋名称</th>
+            <th>房屋类型</th>
+            <th>国家</th>
+            <th>城市</th>
+            <th>推荐入住人数</th>
+            <th>基础价格</th>
+            <th>房源等级</th>
+            <th>房东姓名</th>
+            <th>房东星级</th>
+            <th>状态</th>
+            <th>添加者</th>
+            <th class="table-last">操作</th>
+          </tr>
+          <%= render partial: 'offer', collection: @offers %>
+        </table>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <%= paginate @offers, theme: 'bootstrap' %>
+    </div>
+  </div>
+</div>
+
+<!-- 批量关联模态 -->
+<div id="batch-offer-owner-modal" class="modal bs-modal-lg fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <%= form_tag batch_set_offer_owner_information_cpanel_offers_path, method: :put, remote: :true, id: 'batch_set_offer_owner_form', class: 'form-horizontal' do %>
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+            <h4 class="modal-title">选择房东</h4>
+          </div>
+          <div class="modal-body">
+            <div class="batch_error_messages"></div>
+            <div class="form-group">
+              <div class="row text-center">
+                <label class="col-md-2">房东ID:</label>
+                <input id="offer_batch_offer_owner_information_id", type="text" class="col-md-6" >
+                <%= link_to "搜索", 'javascript:;', id: 'offer_batch_offer_owner_information_id', class: 'batch_search_owner_information  btn btn-xs btn-primary' %>
+              </div>
+              <div class="form-group">
+                <div class="batch-offer-owner-show-detail">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="mg-bt btn default" data-dismiss="modal" aria-hidden="true">关闭</button>
+            <input type="submit" name="commit" id="batch_btn" value="保存" class="mg-bt btn blue-madison" data-disable-with="请稍等...">
+          </div>
+        </div>
+      </div>
+  <% end %>
+</div>
+
+<div id="j-offer-check-failed-modal" class="modal bs-modal-lg fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <form accept-charset="UTF-8" data-remote="true" method="post" class="form-horizontal">
+    <input name="utf8" type="hidden" value="&#x2713;" /><input type="hidden" name="_method" value="put" />
+    <input name="auditor_id" type="hidden" value="<%= current_admin.id%>">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h3>审核不通过原因</h3>
+        </div>
+        <div class="modal-body">
+          <div class="j_error_messages"></div>
+          <div class="form-group">
+            <div class="col-md-2">
+              <label for="check_failed_reason">原因:</label>
+            </div>
+            <div class="col-md-8">
+              <select class="j-offer-check-failed-reason-select form-control" name="check_failed_reason" style="width: auto;">
+                <option value>请选择</option>
+                <option value='图片含水印'>图片含水印</option>
+                <option value='房源无来源'>房源无来源</option>
+                <option value='源网站已下架'>源网站已下架</option>
+                <option value='其它'>其它</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-md-2">
+              <label for="check_failed_reason">详细原因:</label>
+            </div>
+            <div class="col-md-8">
+              <textarea name="failed_reason_detail" id="failed_reason_detail" rows="10" placeholder="请填写1~50字的详细原因说明" style="width: 100%; border: solid 1px #e5e5e5"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="mg-bt btn default" data-dismiss="modal" aria-hidden="true">关闭</button>
+          <input type="submit" name="commit" value="保存" class="mg-bt btn blue-madison" data-disable-with="请稍等...">
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script type="text/javascript">
+    CPANEL.Offers.BatchBindOfferOwner.batch_bind_offer_owner_id();
+    CPANEL.Offers.SetHighPointOffer.set_highpoint_offer();
+    CPANEL.Offers.SelectAll.use_dynamic_select();
+    CPANEL.Offers.SetCheckFailedReason();
+</script>
